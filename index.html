@@ -6,7 +6,7 @@
 <title>블루 아카이브 영수증 생성기</title>
 <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
 
-<!--/* Version: 1.01 */-->
+<!--/* Version: 1.03 */-->
 
 
 <style>
@@ -402,7 +402,7 @@
                 <select id="new-momo">
                     <option value="1">EP 1 완료</option><option value="2">EP 2 완료</option><option value="3">EP 3 완료</option>
                     <option value="4">EP 4 완료</option><option value="5">EP 5 완료</option><option value="6">EP 6 완료</option>
-					<option value="7">EP 7 완료</option>
+					<option value="7">EP 7 완료</option><option value="none">안 봄</option>
                 </select>
             </div>
             <button class="btn-add" id="main-btn" onclick="addOrUpdateStudent()">⬇ 목록에 추가하기</button>
@@ -955,14 +955,28 @@
     ];
 
     const grandRaidSeasons = [
-        "시즌 1 - 페로로지라 (특수장갑)", "시즌 2 - 시로 & 쿠로 (중장갑)", "시즌 3 - KAITEN FX Mk.0 (...",
-        "시즌 4 - 호드 (중장갑)", "시즌 5 - 고즈 (중장갑)", "시즌 6 - 시로 & 쿠로 (경장갑)",
-        "시즌 7 - KAITEN FX Mk.0 (...", "시즌 8 - 비나 (특수장갑)", "시즌 9 - 그레고리오 (중장갑)",
-        "시즌 10 - 예로니무스 (특수장갑)", "시즌 11 - 호버크래프트 (경장갑)", "시즌 12 - 시로 & 쿠로 (중장갑)",
-        "시즌 13 - 고즈 (중장갑)", "시즌 14 - 페로로지라 (탄력장갑)", "시즌 15 - 묘귀 쿠로카게 (탄력장갑)",
-        "시즌 16 - 헤세드 (특수장갑)", "시즌 17 - 비나 (중장갑)", "시즌 18 - KAITEN FX Mk.0 (...",
-        "시즌 19 - 그레고리오 (특수장갑)", "시즌 20 - 비나 (경장갑)", "시즌 21 - 헤세드 (탄력장갑)",
-        "시즌 22 - 시로 & 쿠로 (탄력장갑)"
+        "시즌 1 - 페로로지라 (야전)", 
+		"시즌 2 - 시로 & 쿠로 (실내전)", 
+		"시즌 3 - KAITEN FX Mk.0 (...",
+        "시즌 4 - 호드 (시가전)", 
+		"시즌 5 - 고즈 (야전)", 
+		"시즌 6 - 시로 & 쿠로 (시가전)",
+        "시즌 7 - KAITEN FX Mk.0 (...", 
+		"시즌 8 - 비나 (시가전)", 
+		"시즌 9 - 그레고리오 (실내전)",
+        "시즌 10 - 예로니무스 (시가전)", 
+		"시즌 11 - 호버크래프트 (야전)", 
+		"시즌 12 - 시로 & 쿠로 (실내전)",
+        "시즌 13 - 고즈 (야전)", 
+		"시즌 14 - 페로로지라 (야전)", 
+		"시즌 15 - 묘귀 쿠로카게 (시가전)",
+        "시즌 16 - 헤세드 (야전)", 
+		"시즌 17 - 비나 (시가전)", 
+		"시즌 18 - KAITEN FX Mk.0 (...",
+        "시즌 19 - 그레고리오 (실내전)", 
+		"시즌 20 - 비나 (야전)", 
+		"시즌 21 - 헤세드 (실내전)",
+        "시즌 22 - 시로 & 쿠로 (실내전)"
     ];
 
     const eliminationRaidSeasons = [
@@ -1790,14 +1804,19 @@
 
     function renderReceipt() {
         const container = document.getElementById('student-list-container');
-        container.innerHTML = ""; 
+        container.innerHTML = "";
+        
         studentData.forEach(student => {
+            let momoRow = "";
+            if (student.momo && student.momo !== "") {
+                momoRow = `<div class="record-row"><span class="record-label">ㆍ모모톡 진행도</span><span class="record-value">${student.momo}</span></div>`;
+            }
+
             const html = `
             <div class="student-entry">
                 <div class="student-name">${student.name}</div>
                 <div class="record-row"><span class="record-label">ㆍ스킬 성장</span><span class="record-value">${student.skill}</span></div>
-                <div class="record-row"><span class="record-label">ㆍ모모톡 진행도</span><span class="record-value">${student.momo}</span></div>
-            </div>`;
+                ${momoRow} </div>`;
             container.innerHTML += html;
         });
     }
@@ -1907,7 +1926,11 @@
         } 
         
         const finalName = `${name} (Lv. ${level}, ${starString})`;
-        const finalMomo = `모모톡 인연스토리 EP ${momoEp} 완료`;
+		let finalMomo = "";
+        if (momoEp !== "none") {
+            finalMomo = `모모톡 인연스토리 EP ${momoEp} 완료`;
+        }
+        
         const newEntry = { name: finalName, skill: skillString, momo: finalMomo };
 
         if(editingIndex === -1) {
@@ -1926,7 +1949,7 @@
         document.getElementById('new-name').focus();
     }
 
-function startEdit(index) {
+	function startEdit(index) {
         editingIndex = index;
         const data = studentData[index];
 
@@ -1956,9 +1979,13 @@ function startEdit(index) {
             document.getElementById('sk-3').value = formatBack(skills[3]);
         }
         
-        const momoMatch = data.momo.match(/EP (\d+)/);
-        if(momoMatch) {
-            document.getElementById('new-momo').value = momoMatch[1];
+		if (data.momo === "") {
+            document.getElementById('new-momo').value = "none";
+        } else {
+            const momoMatch = data.momo.match(/EP (\d+)/);
+            if(momoMatch) {
+                document.getElementById('new-momo').value = momoMatch[1];
+            }
         }
 
         const btn = document.getElementById('main-btn');
