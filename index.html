@@ -1831,23 +1831,27 @@
             div.draggable = true;
             
             div.ondragstart = (e) => studentDragStart(e, index);
-			div.ondragend = (e) => dragEnd(e);
+            div.ondragend = (e) => dragEnd(e);
             div.ondragover = (e) => dragOver(e);
             div.ondrop = (e) => studentDrop(e, index);
             div.ondragenter = (e) => e.target.classList.add('drag-over');
             div.ondragleave = (e) => e.target.classList.remove('drag-over');
-
+            
             let shortSkill = student.skill.replace('EX. ', '').replace(/MAX/g, 'M').replace(/Lv\. /g, '').replace(/ \/ /g, '/');
-            let shortMomo = '';
+            
+            let momoText = ""; 
             const momoMatch = student.momo.match(/EP \d+/);
-            if(momoMatch) shortMomo = momoMatch[0];
-            const fullText = `${student.name} (${shortSkill}) (${shortMomo})`;
+            if(momoMatch) {
+                momoText = ` (${momoMatch[0]})`;
+            }
+
+            const fullText = `${student.name} (${shortSkill})${momoText}`;
 
             div.innerHTML = `
                 <div class="drag-handle" title="드래그하여 이동">☰</div>
 
                 <div class="gift-info">
-                    <span class="gift-name-text">${fullText}</span>
+                    <span class="gift-name-text" style="font-weight:normal;">${fullText}</span>
                 </div>
                 
                 <div style="display:flex; align-items:center;">
